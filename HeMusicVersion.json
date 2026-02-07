@@ -1,6 +1,21 @@
 {
-  "watch":"1.5",
-  "android":"1.0",
-  "watch_updata_des":"添加了同步器支持，添加了主题支持，优化性能和使用体验"，
-  "phone_updata_des":"作为初始版本发布"
+  "watch": {
+    "version": "1.5",
+    "update_notes": [
+      "优化歌词滚动性能",
+      "添加同步器支持",
+      "添加自定义主题支持",
+      "添加更新提示",
+      "移除底层的JWT鉴权机制",
+      "添加日志功能"
+    ]
+  },
+  "phone": {
+    "version": "1.0.0",
+    "update_notes": [
+      "作为初始版本发布",
+      "添加日志对手表日志的显示"
+    ],
+    "download_url": "https://cdn.yourapp.com/android/yourapp_v3.0.1.apk"
+  }
 }
