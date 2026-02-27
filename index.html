@@ -4,33 +4,385 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindriftTeam APP版本管理</title>
+    <!-- 引入一款优雅的无衬线字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            --text-color: #4a4a4a;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            /* 柔和的清晨微粉渐变背景 */
+            background: linear-gradient(135deg, #fdfbfb 0%, #ffe6fa 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden; /* 防止出现滚动条 */
         }
-        .container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+
+        /* 樱花画布置于底层 */
+        #sakuraCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* 让鼠标事件穿透画布 */
+        }
+
+        /* 高级感毛玻璃容器 */
+        .glass-container {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            padding: 50px 70px;
             text-align: center;
+            box-shadow: 0 10px 40px rgba(255, 118, 163, 0.15), 
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+            
+            /* 组合动画：入场 + 悬浮呼吸感 */
+            animation: fadeInUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards,
+                       floatAnimation 6s ease-in-out infinite alternate 1.2s;
+            opacity: 0;
+            transform: translateY(30px);
         }
+
+        /* 渐变流光标题 */
         h1 {
-            color: #4CAF50;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 2.2rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            line-height: 1.8;
+            margin: 10px 0;
+            font-weight: 400;
+        }
+
+        /* 团队高亮 */
+        .team-brand {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 8px 20px;
+            background: rgba(255, 117, 140, 0.1);
+            border-radius: 50px;
+            color: #ff5277;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .team-brand:hover {
+            background: rgba(255, 117, 140, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* 动画关键帧 */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes floatAnimation {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-12px); }
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            .glass-container {
+                padding: 40px 30px;
+                margin: 0 20px;
+            }
+            h1 { font-size: 1.8rem; }
+            p { font-size: 1rem; }
+        }
+
+        /* 互动小猫样式 */
+        #interactive-cat {
+            position: fixed;
+            bottom: -10px;
+            right: 5%;
+            width: 140px;
+            height: 140px;
+            z-index: 10;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 5px 15px rgba(255, 118, 163, 0.3));
+        }
+
+        #interactive-cat:hover {
+            transform: translateY(-8px);
+        }
+
+        #cat-tail {
+            transform-origin: 160px 160px;
+            animation: tailWag 3s ease-in-out infinite;
+        }
+
+        @keyframes tailWag {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(15deg); }
+        }
+
+        #meow-bubble {
+            position: absolute;
+            top: -20px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 118, 163, 0.3);
+            padding: 6px 14px;
+            border-radius: 12px 12px 12px 0;
+            font-size: 14px;
+            color: #ff5277;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transform: translateY(10px);
+        }
+        
+        #eyes-group {
+            transition: transform 0.15s;
+            transform-origin: 100px 125px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <!-- 樱花动画容器 -->
+    <canvas id="sakuraCanvas"></canvas>
+
+    <!-- 主体内容 -->
+    <div class="glass-container">
         <h1>网络访问成功！</h1>
-        <p>这说明您可以访问部署到版本控制系统！</p>
-        <p>Dev by <strong>MindriftTeam</strong> </p>
+        <p>这说明您可以访问部署到版本控制系统</p>
+        <p>版本服务运作正常喵~</p>
+        <div class="team-brand">Dev by MindriftTeam</div>
     </div>
+
+    <!-- 互动小猫 SVG -->
+    <div id="interactive-cat">
+        <div id="meow-bubble">呀！是客人呀~这类很少人来喔！</div>
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+            <!-- 尾巴 -->
+            <path id="cat-tail" d="M 130 150 Q 180 180 170 100" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+            <!-- 身体 -->
+            <path d="M 45 200 C 45 130 155 130 155 200 Z" fill="#fff"/>
+            <!-- 后面的耳朵 (右) -->
+            <polygon points="140,120 160,60 110,100" fill="#fff"/>
+            <polygon points="138,110 154,70 120,98" fill="#ffe6fa"/>
+            <!-- 前面的耳朵 (左) -->
+            <polygon points="60,120 40,60 90,100" fill="#fff"/>
+            <polygon points="62,110 46,70 80,98" fill="#ffe6fa"/>
+            <!-- 脸部 -->
+            <ellipse cx="100" cy="130" rx="55" ry="45" fill="#fff"/>
+            
+            <g id="eyes-group">
+                <!-- 眼睛基底 -->
+                <ellipse cx="75" cy="125" rx="10" ry="12" fill="#fff" stroke="#f0f0f0" stroke-width="2"/>
+                <ellipse cx="125" cy="125" rx="10" ry="12" fill="#fff" stroke="#f0f0f0" stroke-width="2"/>
+                <!-- 瞳孔 (随鼠标移动) -->
+                <g id="pupils">
+                    <circle cx="75" cy="125" r="7" fill="#4a4a4a"/>
+                    <circle cx="125" cy="125" r="7" fill="#4a4a4a"/>
+                    <!-- 高光 -->
+                    <circle cx="73" cy="122" r="2" fill="#fff"/>
+                    <circle cx="123" cy="122" r="2" fill="#fff"/>
+                </g>
+            </g>
+            
+            <!-- 鼻子和嘴巴 -->
+            <polygon points="97,138 103,138 100,142" fill="#ffb3e6"/>
+            <path d="M 90 145 Q 95 152 100 145 Q 105 152 110 145" fill="none" stroke="#ffb3e6" stroke-width="2" stroke-linecap="round"/>
+            
+            <!-- 腮红 -->
+            <ellipse cx="60" cy="138" rx="8" ry="4" fill="#ffb3e6" opacity="0.5"/>
+            <ellipse cx="140" cy="138" rx="8" ry="4" fill="#ffb3e6" opacity="0.5"/>
+        </svg>
+    </div>
+
+    <!-- 樱花飘落动画脚本 -->
+    <script>
+        const canvas = document.getElementById('sakuraCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 自适应窗口大小
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const petals = [];
+        const numPetals = 65; // 樱花花瓣数量
+
+        class Petal {
+            constructor() {
+                this.reset();
+                // 初始化时让花瓣均匀分布在整个屏幕
+                this.y = Math.random() * canvas.height;
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -20; // 从顶部上方开始
+                this.size = 8 + Math.random() * 8; // 花瓣大小
+                this.speedY = 1 + Math.random() * 1.5; // 下落速度
+                this.speedX = -1 + Math.random() * 2; // 水平漂移
+                this.rotation = Math.random() * 360; // 初始旋转角度
+                this.rotationSpeed = -0.05 + Math.random() * 0.1; // 旋转速度
+                this.flip = Math.random(); // 3D翻转系数
+                this.flipSpeed = Math.random() * 0.05; // 翻转速度
+                this.opacity = 0.5 + Math.random() * 0.5; // 透明度
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                this.rotation += this.rotationSpeed;
+                this.flip += this.flipSpeed;
+
+                // 模拟轻微风的扰动
+                this.speedX += (Math.random() - 0.5) * 0.03;
+                if (this.speedX > 2.5) this.speedX = 2.5;
+                if (this.speedX < -2.5) this.speedX = -2.5;
+
+                // 如果飘出屏幕，重置到顶部
+                if (this.y > canvas.height + this.size || 
+                    this.x < -this.size || 
+                    this.x > canvas.width + this.size) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                // 使用缩放实现 3D 翻转视觉效果
+                ctx.scale(Math.sin(this.flip), 1);
+                ctx.globalAlpha = this.opacity;
+
+                // 绘制樱花花瓣的形状 (类似水滴/心形的一半)
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(this.size / 2, -this.size / 1.5, this.size, this.size / 3, 0, this.size);
+                ctx.bezierCurveTo(-this.size, this.size / 3, -this.size / 2, -this.size / 1.5, 0, 0);
+                ctx.closePath();
+
+                // 柔和的樱花粉渐变色填充
+                const gradient = ctx.createLinearGradient(0, 0, 0, this.size);
+                gradient.addColorStop(0, '#ffb3e6');
+                gradient.addColorStop(1, '#ff80cc');
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                ctx.restore();
+            }
+        }
+
+        // 初始化花瓣集合
+        for (let i = 0; i < numPetals; i++) {
+            petals.push(new Petal());
+        }
+
+        // 动画主循环
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < petals.length; i++) {
+                petals[i].update();
+                petals[i].draw();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // 启动动画
+        animate();
+
+        // --- 小猫互动逻辑 ---
+        const cat = document.getElementById('interactive-cat');
+        const pupils = document.getElementById('pupils');
+        const bubble = document.getElementById('meow-bubble');
+        const eyesGroup = document.getElementById('eyes-group');
+        let meowTimeout;
+
+        // 1. 视线跟随鼠标
+        document.addEventListener('mousemove', (e) => {
+            const catRect = cat.getBoundingClientRect();
+            // 计算小猫眼睛大概在屏幕上的中心点
+            const catCenterX = catRect.left + catRect.width / 2;
+            const catCenterY = catRect.top + catRect.height * 0.6; 
+
+            const deltaX = e.clientX - catCenterX;
+            const deltaY = e.clientY - catCenterY;
+            const angle = Math.atan2(deltaY, deltaX);
+            
+            // 限制瞳孔移动的最大距离
+            const distance = Math.min(Math.hypot(deltaX, deltaY) / 60, 4); 
+
+            const moveX = Math.cos(angle) * distance;
+            const moveY = Math.sin(angle) * distance;
+
+            pupils.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        // 2. 点击互动：跳跃 + 叫声气泡
+        cat.addEventListener('click', () => {
+            // 跳跃效果
+            cat.style.transform = 'translateY(-30px) scale(1.05)';
+            setTimeout(() => {
+                cat.style.transform = '';
+            }, 300);
+
+            // 显示气泡
+            bubble.style.opacity = '1';
+            bubble.style.transform = 'translateY(-10px)';
+            
+            clearTimeout(meowTimeout);
+            meowTimeout = setTimeout(() => {
+                bubble.style.opacity = '0';
+                bubble.style.transform = 'translateY(10px)';
+            }, 2000);
+        });
+
+        // 3. 随机眨眼动画
+        function randomBlink() {
+            eyesGroup.style.transform = 'scaleY(0.1)';
+            setTimeout(() => {
+                eyesGroup.style.transform = 'scaleY(1)';
+            }, 150); // 闭眼持续时间
+
+            // 下一次眨眼的随机时间 (2秒到6秒之间)
+            const nextBlink = 2000 + Math.random() * 4000;
+            setTimeout(randomBlink, nextBlink);
+        }
+        // 启动眨眼
+        setTimeout(randomBlink, 2000);
+    </script>
 </body>
 </html>
