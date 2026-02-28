@@ -11,13 +11,13 @@
     ]
   },
   "phone": {
-    "version": "1.0.0",
+    "version": "1.1.0",
     "update_notes": [
       "添加源测试，快速判断能否使用",
       "添加云端源仓库，摆脱麻烦配置",
       "修复了系统主题暗色下显示bug",
       "优化音源配置，修改为开启自动轮换以及允许指定音源"
     ],
-    "download_url": "https://pan.quark.cn/s/86a757e67ff9"
+    "download_url": "https://pan.quark.cn/s/22ad73c484e9"
   }
 }
